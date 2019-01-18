@@ -1,5 +1,7 @@
-#include<iostream>
-int main() {
-  std::cout << "Hello World" << std::endl;
-  return 0;
+#include "fib.h"
+
+int main()
+{
+	fib(3);
+	return 0;
 }

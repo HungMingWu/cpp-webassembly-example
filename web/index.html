@@ -1,5 +1,34 @@
 <html>
-  <body>
-    <script src="gen/hello.js"></script>
-  </body>
+<body>
+<script>
+function loadWasm(path, imports = {}) {
+  return fetch(path)
+    .then(response => response.arrayBuffer())
+    .then(buffer => WebAssembly.compile(buffer))
+    .then(module => {
+      imports.env = imports.env || {}
+      imports.env.abortStackOverflow = imports.env.abortStackOverflow || new Function();
+      imports.env.__memory_base = imports.env.__memory_base || 0
+      if (!imports.env.memory) {
+        imports.env.memory = new WebAssembly.Memory({ initial: 10, maximum: 100 })
+      }
+
+      imports.env.__table_base = imports.env.__table_base || 0
+      if (!imports.env.table) {
+        imports.env.table = new WebAssembly.Table({ initial: 0, element: 'anyfunc' })
+      }
+
+      return new WebAssembly.Instance(module, imports)
+    })
+}
+
+loadWasm('gen/hello.wasm')
+  .then(instance => {
+    let fib = instance.exports.__Z3fibi;
+    console.log(fib(1));
+    console.log(fib(20));
+  });
+
+</script>
+</body>
 </html>
